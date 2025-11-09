@@ -116,12 +116,3 @@ RUN mise use -g gem:rails
 RUN mise use -g vfox:mise-plugins/vfox-php
 RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
-
-
-
-
-
-
-
-
-
