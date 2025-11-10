@@ -139,10 +139,9 @@ RUN rm -rf /home/${user}/.config/astro \
 
 # Enable kata
 ARG kata_location=${homedir}/.local/bin
-RUN git clone https://github.com/vishalgit/vim-kata && mv vim-kata .vim-kata && \
+RUN git clone https://github.com/vishalgit/vim-kata && mv vim-kata ${homedir}/.vim-kata && \
 echo '#!/bin/bash' > ${kata_location}/kata && \
 echo 'export NVIM_APPNAME=astro' >> ${kata_location}/kata && \
-echo 'cd ${homedir}/.vim-kata' >> ${kata_location}/kata && \
-echo './run.sh' >> ${kata_location}/kata && \
+echo '.${homedir}/.vim-kata/run.sh' >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
 
