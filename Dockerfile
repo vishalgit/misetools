@@ -116,3 +116,33 @@ RUN mise use -g gem:rails
 RUN mise use -g vfox:mise-plugins/vfox-php
 RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
+
+# Neovim setup
+RUN sudo apt-get update && sudo apt-get upgrade -y \
+&& sudo apt-get install -y \
+fd-find \
+python3-pip \
+python3-pynvim \
+python3-venv \
+ruby-neovim \
+luarocks \
+&& sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* 
+
+RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm
+
+RUN rm -rf /home/${user}/.config/astro \
+&& git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
+&& echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
+&& cd /home/${user}/.config/astro \
+&& git remote add upstream https://github.com/AstroNvim/template \
+&& git remote set-url --push upstream DISABLE
+
+# Enable kata
+ARG kata_location=${homedir}/.local/bin
+RUN git clone https://github.com/vishalgit/vim-kata && mv vim-kata .vim-kata && \
+echo '#!/bin/bash' > ${kata_location}/kata && \
+echo 'export NVIM_APPNAME=astro' >> ${kata_location}/kata && \
+echo 'cd ${homedir}/.vim-kata' >> ${kata_location}/kata && \
+echo './run.sh' >> ${kata_location}/kata && \
+chmod u+x ${kata_location}/kata
+
