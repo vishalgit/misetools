@@ -48,6 +48,12 @@ libzip-dev \
 openssl \
 pkg-config \
 re2c \
+fd-find \
+python3-pip \
+python3-pynvim \
+python3-venv \
+ruby-neovim \
+luarocks \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -118,16 +124,6 @@ RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
 
 # Neovim setup
-RUN sudo apt-get update && sudo apt-get upgrade -y \
-&& sudo apt-get install -y \
-fd-find \
-python3-pip \
-python3-pynvim \
-python3-venv \
-ruby-neovim \
-luarocks \
-&& sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* 
-
 RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm
 
 RUN rm -rf /home/${user}/.config/astro \
@@ -145,4 +141,3 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
-
