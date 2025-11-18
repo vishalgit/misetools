@@ -142,3 +142,6 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
+
+# Enable tmux-kata
+RUN cd ${homedir}/.tmux-kata && chmod +x install.sh && ./install.sh

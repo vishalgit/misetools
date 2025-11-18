@@ -62,14 +62,6 @@ if [[ -f "TMUX-REFERENCE.md" ]]; then
     echo "✓ Installed TMUX-REFERENCE.md"
 fi
 
-# Create alias suggestion
-SHELL_RC=""
-if [[ -f "$HOME/.bashrc" ]]; then
-    SHELL_RC="$HOME/.bashrc"
-elif [[ -f "$HOME/.zshrc" ]]; then
-    SHELL_RC="$HOME/.zshrc"
-fi
-
 echo
 echo "═══════════════════════════════════════════"
 echo "Installation Complete! 🎉"
@@ -80,26 +72,11 @@ echo "  1. cd $INSTALL_DIR"
 echo "  2. tmux"
 echo "  3. ./$SCRIPT_NAME"
 echo
-echo "Optional: Add an alias to your shell config ($SHELL_RC):"
+echo "Optional: Add an alias to your shell config :"
 echo "  alias tmux-kata='cd $INSTALL_DIR && tmux new-session -s kata \; send-keys \"./$SCRIPT_NAME\" C-m'"
 echo
 echo "Then you can start training anytime with: tmux-kata"
 echo
 echo "Quick reference: cat $INSTALL_DIR/TMUX-REFERENCE.md"
-echo
-
-# Offer to add alias
-if [[ -n "$SHELL_RC" ]]; then
-    echo -n "Add alias to $SHELL_RC now? [y/N] "
-    read response
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        echo "" >> "$SHELL_RC"
-        echo "# Tmux Kata Training" >> "$SHELL_RC"
-        echo "alias tmux-kata='cd $INSTALL_DIR && tmux new-session -s kata \; send-keys \"./$SCRIPT_NAME\" C-m'" >> "$SHELL_RC"
-        echo "✓ Alias added to $SHELL_RC"
-        echo "  Restart your shell or run: source $SHELL_RC"
-    fi
-fi
-
 echo
 echo "Happy learning! 🚀"
