@@ -88,14 +88,14 @@ RUN git config --global core.editor nvim \
 
 # Copy certs
 RUN cd && mkdir -p ${homedir}/certs
-COPY milliman.crt ${homedir}/certs/milliman.crt
-COPY milliman.pem ${homedir}/certs/milliman.pem
+COPY --chown=${user}:${group} milliman.crt ${homedir}/certs/milliman.crt
+COPY --chown=${user}:${group} milliman.pem ${homedir}/certs/milliman.pem
 
 # Copy config files
-COPY tmux/sample.tmux.conf ${homedir}/.tmux.conf
+COPY --chown=${user}:${group} tmux/sample.tmux.conf ${homedir}/.tmux.conf
 RUN mkdir -p ${homedir}/.config/rclone
-COPY rclone.conf ${homedir}/.config/rclone/rclone.conf
-COPY tmux/ ${homedir}/.tmux-kata/
+COPY --chown=${user}:${group} rclone.conf ${homedir}/.config/rclone/rclone.conf
+COPY --chown=${user}:${group} tmux/ ${homedir}/.tmux-kata/
 
 # Setup oh-my-zsh
 RUN mkdir -p /home/${user}/.config/ezsh
