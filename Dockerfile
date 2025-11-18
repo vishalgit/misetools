@@ -92,9 +92,10 @@ COPY milliman.crt ${homedir}/certs/milliman.crt
 COPY milliman.pem ${homedir}/certs/milliman.pem
 
 # Copy config files
-COPY tmux.conf ${homedir}/.tmux.conf
+COPY tmux/sample.tmux.conf ${homedir}/.tmux.conf
 RUN mkdir -p ${homedir}/.config/rclone
 COPY rclone.conf ${homedir}/.config/rclone/rclone.conf
+COPY tmux/ ${homedir}/.tmux-kata/
 
 # Setup oh-my-zsh
 RUN mkdir -p /home/${user}/.config/ezsh
