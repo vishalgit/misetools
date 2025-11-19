@@ -54,7 +54,6 @@ python3-pynvim \
 python3-venv \
 ruby-neovim \
 luarocks \
-dos2unix \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -85,9 +84,7 @@ RUN git config --global core.editor nvim \
 && git config --global init.defaultBranch main \
 && git config --global pull.rebase true \
 && git config --global user.email ${email} \
-&& git config --global user.name ${name} \
-&& git config --global core.autocrlf false \
-&& git config --global core.eol lf
+&& git config --global user.name ${name} 
 
 # Copy certs
 RUN cd && mkdir -p ${homedir}/certs
@@ -95,10 +92,11 @@ COPY --chown=${user}:${group} milliman.crt ${homedir}/certs/milliman.crt
 COPY --chown=${user}:${group} milliman.pem ${homedir}/certs/milliman.pem
 
 # Copy config files
-COPY --chown=${user}:${group} tmux/sample.tmux.conf ${homedir}/.tmux.conf
+RUN mkdir -p ${homedir}/.tmux/plugins/tpm
+RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
+COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
 RUN mkdir -p ${homedir}/.config/rclone
 COPY --chown=${user}:${group} rclone.conf ${homedir}/.config/rclone/rclone.conf
-COPY --chown=${user}:${group} tmux/ ${homedir}/.tmux-kata/
 
 # Setup oh-my-zsh
 RUN mkdir -p /home/${user}/.config/ezsh
@@ -145,9 +143,3 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
-
-# Enable tmux-kata
-RUN mkdir -p ${homedir}/.tmux/plugins/tpm && git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
-RUN cd ${homedir}/.tmux-kata && chmod +x install.sh && ./install.sh && rm -rf ${homedir}/.tmux-kata
-ARG tmux_kata_location=${homedir}/tmux-kata
-RUN echo "alias tmux-kata=\"cd ${tmux_kata_location} && tmux new-session -s tmux-kata \; send-keys \"./tmux-kata.sh\" C-m\"" >> /home/${user}/.config/ezsh/ezshrc.zsh
