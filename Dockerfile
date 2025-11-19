@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:latest
 
 USER root
 WORKDIR /root
@@ -54,6 +54,7 @@ python3-pynvim \
 python3-venv \
 ruby-neovim \
 luarocks \
+dos2unix \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -84,7 +85,9 @@ RUN git config --global core.editor nvim \
 && git config --global init.defaultBranch main \
 && git config --global pull.rebase true \
 && git config --global user.email ${email} \
-&& git config --global user.name ${name}
+&& git config --global user.name ${name} \
+&& git config --global core.autocrlf false \
+&& git config --global core.eol lf
 
 # Copy certs
 RUN cd && mkdir -p ${homedir}/certs
