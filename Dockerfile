@@ -121,6 +121,7 @@ RUN mise use -g node
 RUN mise use -g dotnet
 RUN mise use -g ruby
 RUN mise use -g gem:rails
+RUN mise use -g php
 RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
 
