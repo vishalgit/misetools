@@ -144,6 +144,7 @@ echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
 
 # Enable tmux-kata
+RUN mkdir -p ${homedir}/.tmux/plugins/tpm && git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
 RUN cd ${homedir}/.tmux-kata && chmod +x install.sh && ./install.sh && rm -rf ${homedir}/.tmux-kata
 ARG tmux_kata_location=${homedir}/tmux-kata
 RUN echo "alias tmux-kata=\"cd ${tmux_kata_location} && tmux new-session -s tmux-kata \; send-keys \"./tmux-kata.sh\" C-m\"" >> /home/${user}/.config/ezsh/ezshrc.zsh
