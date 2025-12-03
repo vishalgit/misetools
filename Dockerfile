@@ -54,6 +54,7 @@ python3-pynvim \
 python3-venv \
 ruby-neovim \
 luarocks \
+ripgrep \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -117,6 +118,7 @@ RUN mkdir -p ${homedir}/.config/mise
 ENV NODE_EXTRA_CA_CERTS=${homedir}/certs/milliman.pem
 RUN mise use -g go
 RUN mise use -g rust
+RUN rustup component add rust-analyzer && rustup target add wasm32-unknown-unknown x86_64-pc-windows-gnu
 RUN mise use -g node
 RUN mise use -g dotnet
 RUN mise use -g ruby
