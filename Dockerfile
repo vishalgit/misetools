@@ -126,7 +126,7 @@ RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
 
 # Neovim setup
-RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm
+RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm npm:@anthropic-ai/claude-code
 
 RUN rm -rf /home/${user}/.config/astro \
 && git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
