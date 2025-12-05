@@ -125,7 +125,7 @@ RUN mise use -g gem:rails
 RUN mise use -g php
 RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
-RUN mise use -g ubi:helix-editor/helix
+
 
 # Neovim setup
 RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm npm:@anthropic-ai/claude-code
