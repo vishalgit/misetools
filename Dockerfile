@@ -15,6 +15,7 @@ zsh \
 build-essential \
 software-properties-common \
 xclip \
+wayclip \
 sudo \
 tmux \
 gnupg2 \
