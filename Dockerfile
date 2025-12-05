@@ -118,6 +118,8 @@ RUN mkdir -p ${homedir}/.config/mise
 ENV NODE_EXTRA_CA_CERTS=${homedir}/certs/milliman.pem
 RUN mise use -g go
 RUN mise use -g rust
+RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
+RUN ${homedir}/.cargo/bin/rustup target add wasm32-unknown-unknown x86_64-pc-windows-gnu
 RUN mise use -g node@lts
 RUN mise use -g dotnet
 RUN mise use -g ruby
@@ -125,7 +127,7 @@ RUN mise use -g gem:rails
 RUN mise use -g php
 RUN mise use -g neovim
 RUN mise use -g aqua:rclone/rclone
-
+RUN mise use -g aqua:helix-editor/helix
 
 # Neovim setup
 RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm npm:@anthropic-ai/claude-code
@@ -145,4 +147,5 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
+
 
