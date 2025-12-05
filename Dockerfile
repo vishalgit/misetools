@@ -118,9 +118,7 @@ RUN mkdir -p ${homedir}/.config/mise
 ENV NODE_EXTRA_CA_CERTS=${homedir}/certs/milliman.pem
 RUN mise use -g go
 RUN mise use -g rust
-RUN rustup component add rust-analyzer && rustup target add wasm32-unknown-unknown x86_64-pc-windows-gnu
-RUN cargo install cargo-leptos
-RUN mise use -g node
+RUN mise use -g node@lts
 RUN mise use -g dotnet
 RUN mise use -g ruby
 RUN mise use -g gem:rails
@@ -146,3 +144,4 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
+
