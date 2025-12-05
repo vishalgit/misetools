@@ -15,7 +15,6 @@ zsh \
 build-essential \
 software-properties-common \
 xclip \
-wayclip \
 sudo \
 tmux \
 gnupg2 \
@@ -120,6 +119,7 @@ ENV NODE_EXTRA_CA_CERTS=${homedir}/certs/milliman.pem
 RUN mise use -g go
 RUN mise use -g rust
 RUN rustup component add rust-analyzer && rustup target add wasm32-unknown-unknown x86_64-pc-windows-gnu
+RUN cargo install cargo-leptos
 RUN mise use -g node
 RUN mise use -g dotnet
 RUN mise use -g ruby
