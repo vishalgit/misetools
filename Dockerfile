@@ -64,16 +64,14 @@ update-ca-certificates && mkdir -p /root/certs
 COPY milliman.pem /root/certs/milliman.pem
 
 # Setup non root user
-ARG user=vishal
-ARG group=vishal
-ARG uid=1001
-ARG gid=1001
+ARG user=ubuntu
+ARG group=ubuntu
+ARG uid=1000
+ARG gid=1000
 ARG email=vishal.reply@gmail.com
 ARG name="Vishal Saxena"
 ARG homedir=/home/${user}
 
-RUN groupadd -g ${gid} ${group} \
-&& useradd -u ${uid} -g ${group} -s /bin/bash -m ${user}
 RUN echo '%'${group}' ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/nopasswd_${group} \
 && chmod 0440 /etc/sudoers.d/nopasswd_${group}
 
@@ -88,9 +86,9 @@ RUN git config --global core.editor nvim \
 && git config --global user.name ${name} 
 
 # Copy certs
-RUN cd && mkdir -p ${homedir}/certs
-COPY --chown=${user}:${group} milliman.crt ${homedir}/certs/milliman.crt
-COPY --chown=${user}:${group} milliman.pem ${homedir}/certs/milliman.pem
+RUN cd && mkdir -p ${homedir}/.certs
+COPY --chown=${user}:${group} milliman.crt ${homedir}/.certs/milliman.crt
+COPY --chown=${user}:${group} milliman.pem ${homedir}/.certs/milliman.pem
 
 # Copy config files
 RUN mkdir -p ${homedir}/.tmux/plugins/tpm
@@ -115,7 +113,7 @@ RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:$PATH"
 RUN echo "eval \"\$(mise activate zsh)\"" >> ${homedir}/.config/ezsh/ezshrc.zsh
 RUN mkdir -p ${homedir}/.config/mise
-ENV NODE_EXTRA_CA_CERTS=${homedir}/certs/milliman.pem
+ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
 RUN mise use -g go
 RUN mise use -g rust
 RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
@@ -148,4 +146,6 @@ echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
 
-
+# Configure Helix
+RUN mkdir -p ${homedir}/.config/helix
+COPY --chown=${user}:${group} helix.toml ${homedir}/.config/helix/config.toml   
