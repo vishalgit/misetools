@@ -149,3 +149,8 @@ chmod u+x ${kata_location}/kata
 # Configure Helix
 RUN mkdir -p ${homedir}/.config/helix
 COPY --chown=${user}:${group} helix.toml ${homedir}/.config/helix/config.toml   
+
+ENV TERM=xterm-256color
+ENV COLORTERM=truecolor
+ENV EDITOR=nvim
+ENV VISUAL=nvim
