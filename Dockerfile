@@ -15,7 +15,6 @@ zsh \
 build-essential \
 software-properties-common \
 xclip \
-wl-clipboard \
 sudo \
 tmux \
 gnupg2 \
