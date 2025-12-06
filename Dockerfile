@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
 #Install base system
+RUN add-apt-repository universe -y
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
 git \
 curl \
@@ -15,6 +16,7 @@ zsh \
 build-essential \
 software-properties-common \
 xclip \
+wl-clipboard \
 sudo \
 tmux \
 gnupg2 \
