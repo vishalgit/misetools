@@ -7,7 +7,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
 #Install base system
-RUN add-apt-repository universe -y
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
 git \
 curl \
@@ -56,7 +55,12 @@ python3-pynvim \
 python3-venv \
 ruby-neovim \
 luarocks \
-ripgrep \
+ripgrep
+
+RUN RUN add-apt-repository universe -y \
+&& apt-get update && apt-get upgrade -y \
+&& apt-get install -y --no-install-recommends \
+wl-clipboard \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
