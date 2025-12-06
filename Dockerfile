@@ -56,7 +56,7 @@ ruby-neovim \
 luarocks \
 ripgrep
 
-RUN RUN add-apt-repository universe -y \
+RUN add-apt-repository universe -y \
 && apt-get update && apt-get upgrade -y \
 && apt-get install -y --no-install-recommends \
 wl-clipboard \
