@@ -94,7 +94,6 @@ COPY --chown=${user}:${group} milliman.crt ${homedir}/.certs/milliman.crt
 COPY --chown=${user}:${group} milliman.pem ${homedir}/.certs/milliman.pem
 
 # Copy config files
-RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
 RUN mkdir -p ${homedir}/.config/rclone
 COPY --chown=${user}:${group} rclone.conf ${homedir}/.config/rclone/rclone.conf
 
