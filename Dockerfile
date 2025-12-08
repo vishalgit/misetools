@@ -120,9 +120,27 @@ RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:$PATH"
 RUN echo "eval \"\$(mise activate zsh)\"" >> ${homedir}/.config/ezsh/ezshrc.zsh
 RUN mkdir -p ${homedir}/.config/mise
-COPY --chown=${user}:${group} mise.toml ${homedir}/.config/mise/config.toml 
 
-RUN mise install
+RUN mise use -g go
+RUN mise use -g dotnet
+RUN mise use -g ruby
+RUN mise use -g gem:neovim
+RUN mise use -g gem:rails
+RUN mise use -g node@lts
+RUN mise use -g npm:npm
+RUN mise use -g npm:@anthropic-ai/claude-code
+RUN mise use -g npm:typescript
+RUN mise use -g npm:tree-sitter-cli
+RUN mise use -g npm:neovim
+RUN mise use -g npm:pnpm
+RUN mise use -g vfox:mise-plugins/vfox-php
+RUN mise use -g rust
+RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
+RUN ${homedir}/.cargo/bin/rustup target add wasm32-unknown-unknown 
+RUN mise use -g cargo-binstall
+RUN mise settings set cargo.binstall true
+RUN mise use -g cargo:cargo-leptos
+RUN mise use -g cargo:leptosfmt
 
 # Setup AstroNvim
 RUN rm -rf /home/${user}/.config/astro \
