@@ -82,7 +82,7 @@ USER ${user}
 WORKDIR ${homedir}
 
 # Setup git
-RUN git config --global core.editor avim \
+RUN git config --global core.editor nvim \
 && git config --global init.defaultBranch main \
 && git config --global pull.rebase true \
 && git config --global user.email ${email} \
@@ -112,10 +112,10 @@ RUN sudo chsh -s /usr/bin/zsh ${user}
 
 ENV TERM=xterm-256color
 ENV COLORTERM=truecolor
-ENV EDITOR=avim
-ENV VISUAL=avim
+ENV EDITOR=nvim
+ENV VISUAL=nvim
 ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
-
+RUN echo "gem: --no-document" >> ${homedir}/.gemrc
 # Setup mise
 RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:$PATH"

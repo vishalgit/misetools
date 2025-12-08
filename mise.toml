@@ -1,6 +1,3 @@
-[env]
-MISE_GEM_INSTALL_OPTS = "--no-document"
-
 [tools]
 "aqua:rclone/rclone" = "latest"
 "aqua:zellij-org/zellij" = "latest"
