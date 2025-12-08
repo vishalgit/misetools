@@ -16,7 +16,6 @@ build-essential \
 software-properties-common \
 xclip \
 sudo \
-tmux \
 gnupg2 \
 gh \
 apt-transport-https \
@@ -52,7 +51,6 @@ fd-find \
 python3-pip \
 python3-pynvim \
 python3-venv \
-ruby-neovim \
 luarocks \
 ripgrep
 
@@ -84,7 +82,7 @@ USER ${user}
 WORKDIR ${homedir}
 
 # Setup git
-RUN git config --global core.editor nvim \
+RUN git config --global core.editor avim \
 && git config --global init.defaultBranch main \
 && git config --global pull.rebase true \
 && git config --global user.email ${email} \
@@ -96,9 +94,7 @@ COPY --chown=${user}:${group} milliman.crt ${homedir}/.certs/milliman.crt
 COPY --chown=${user}:${group} milliman.pem ${homedir}/.certs/milliman.pem
 
 # Copy config files
-RUN mkdir -p ${homedir}/.tmux/plugins/tpm
 RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
-COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
 RUN mkdir -p ${homedir}/.config/rclone
 COPY --chown=${user}:${group} rclone.conf ${homedir}/.config/rclone/rclone.conf
 
@@ -113,29 +109,23 @@ RUN git clone https://github.com/vishalgit/ezsh ezsh \
 && rm -rf ezsh 
 RUN sudo chsh -s /usr/bin/zsh ${user}
 
+
+ENV TERM=xterm-256color
+ENV COLORTERM=truecolor
+ENV EDITOR=avim
+ENV VISUAL=avim
+ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
+
 # Setup mise
 RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:$PATH"
 RUN echo "eval \"\$(mise activate zsh)\"" >> ${homedir}/.config/ezsh/ezshrc.zsh
 RUN mkdir -p ${homedir}/.config/mise
-ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
-RUN mise use -g go
-RUN mise use -g rust
-RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
-RUN ${homedir}/.cargo/bin/rustup target add wasm32-unknown-unknown x86_64-pc-windows-gnu
-RUN mise use -g node@lts
-RUN mise use -g dotnet
-RUN mise use -g ruby
-RUN mise use -g gem:rails
-RUN mise use -g php
-RUN mise use -g neovim
-RUN mise use -g aqua:rclone/rclone
-RUN mise use -g aqua:helix-editor/helix
-RUN mise use -g aqua:zellij-org/zellij
+COPY --chown=${user}:${group} mise.toml ${homedir}/.config/mise/config.toml 
 
-# Neovim setup
-RUN mise use -g npm:npm@latest npm:neovim npm:typescript npm:tree-sitter-cli npm:pnpm npm:@anthropic-ai/claude-code
+RUN mise install
 
+# Setup AstroNvim
 RUN rm -rf /home/${user}/.config/astro \
 && git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
 && echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
@@ -151,12 +141,5 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
+ 
 
-# Configure Helix
-RUN mkdir -p ${homedir}/.config/helix
-COPY --chown=${user}:${group} helix.toml ${homedir}/.config/helix/config.toml   
-
-ENV TERM=xterm-256color
-ENV COLORTERM=truecolor
-ENV EDITOR=nvim
-ENV VISUAL=nvim
