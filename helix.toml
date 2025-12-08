@@ -1,3 +1,0 @@
-theme = "gruvbox_dark_hard"
-[keys.insert]
-j = { k = "normal_mode" } # Maps `jk` to exit insert mode
