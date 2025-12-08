@@ -141,6 +141,16 @@ RUN mise use -g cargo-binstall
 RUN mise settings set cargo.binstall true
 RUN mise use -g cargo:cargo-leptos
 RUN mise use -g cargo:leptosfmt
+RUN mise use -g cargo:cargo-check
+RUN mise use -g aqua:zellij-org/zellij
+RUN mise use -g neovim
+RUN mise use -g aqua:jesseduffield/lazygit
+RUN mise use -g ubi:junegunn/fzf
+RUN mise use -g aqua:jqlang/jq
+RUN mise use -g aqua:sharkdp/bat
+RUN mise use -g aqua:eth-p/bat-extras
+RUN mise use -g aqua:sxyazi/yazi
+RUN mise use -g bun
 
 # Setup AstroNvim
 RUN rm -rf /home/${user}/.config/astro \
@@ -148,6 +158,14 @@ RUN rm -rf /home/${user}/.config/astro \
 && echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
 && cd /home/${user}/.config/astro \
 && git remote add upstream https://github.com/AstroNvim/template \
+&& git remote set-url --push upstream DISABLE
+
+# Setup Kickstart
+RUN rm -rf /home/${user}/.config/kickstart \
+&& git clone https://github.com/vishalgit/kickstart.nvim /home/${user}/.config/kickstart \
+&& echo 'alias kvim="NVIM_APPNAME=kickstart nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
+&& cd /home/${user}/.config/kickstart \
+&& git remote add upstream https://github.com/nvim-lua/kickstart.nvim \
 && git remote set-url --push upstream DISABLE
 
 # Enable kata
