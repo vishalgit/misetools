@@ -52,7 +52,8 @@ python3-pip \
 python3-pynvim \
 python3-venv \
 luarocks \
-ripgrep
+ripgrep \
+tmux
 
 RUN add-apt-repository universe -y \
 && apt-get update && apt-get upgrade -y \
@@ -176,4 +177,8 @@ echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
- 
+
+# Setup tmux 
+RUN mkdir -p ${homedir}/notes
+COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
+ENV ZK_NOTEBOOK_DIR=${homedir}/notes

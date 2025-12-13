@@ -14,3 +14,4 @@ docker run -it \
   -v $HOME/projects:/home/ubuntu/projects \
   --net host \
   misetools-image zsh
+Sync Rclone From the home directory run this command rclone bisync notes mega:notes --resync --size-only
