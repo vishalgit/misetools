@@ -152,7 +152,6 @@ RUN mise use -g aqua:jqlang/jq
 RUN mise use -g aqua:sharkdp/bat
 RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
-RUN mise use -g aqua:luarocks/luarocks
 RUN mise use -g bun
 
 # Setup AstroNvim
