@@ -179,6 +179,6 @@ echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
 
 # Setup tmux 
+RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm \
 RUN mkdir -p ${homedir}/notes
 COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
-ENV ZK_NOTEBOOK_DIR=${homedir}/notes
