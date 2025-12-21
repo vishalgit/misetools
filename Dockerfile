@@ -143,14 +143,16 @@ RUN mise settings set cargo.binstall true
 RUN mise use -g cargo:cargo-leptos
 RUN mise use -g cargo:leptosfmt
 RUN mise use -g cargo:cargo-check
+RUN mise use -g lua
 RUN mise use -g aqua:zellij-org/zellij
 RUN mise use -g neovim
 RUN mise use -g aqua:jesseduffield/lazygit
-RUN mise use -g ubi:junegunn/fzf
+RUN mise use -g aqua:junegunn/fzf
 RUN mise use -g aqua:jqlang/jq
 RUN mise use -g aqua:sharkdp/bat
 RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
+RUN mise use -g aqua:luarocks/luarocks
 RUN mise use -g bun
 
 # Setup AstroNvim
