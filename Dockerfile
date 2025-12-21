@@ -115,6 +115,7 @@ ENV COLORTERM=truecolor
 ENV EDITOR=nvim
 ENV VISUAL=nvim
 ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
+ENV TZ=Asia/Kolkata
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
 # Setup mise
 RUN curl https://mise.run | sh
