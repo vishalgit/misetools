@@ -155,12 +155,12 @@ RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
 RUN mise use -g bun
 
-# Setup AstroNvim
-RUN rm -rf /home/${user}/.config/astro \
-&& git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
-&& echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
-&& cd /home/${user}/.config/astro \
-&& git remote add upstream https://github.com/AstroNvim/template \
+# Setup LazyVim 
+RUN rm -rf /home/${user}/.config/lvim \
+&& git clone https://github.com/vishalgit/lazyvim /home/${user}/.config/lvim \
+&& echo 'alias lvim="NVIM_APPNAME=lvim nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
+&& cd /home/${user}/.config/lvim \
+&& git remote add upstream https://github.com/LazyVim/starter \
 && git remote set-url --push upstream DISABLE
 
 # Setup Kickstart
