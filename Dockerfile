@@ -87,7 +87,12 @@ RUN git config --global core.editor nvim \
 && git config --global init.defaultBranch main \
 && git config --global pull.rebase true \
 && git config --global user.email ${email} \
-&& git config --global user.name ${name} 
+&& git config --global user.name ${name} \
+&& git config --global credential.helper ${homedir}/.secrets/gh-cred-helper.sh
+
+RUN mkdir -p ${homedir}/.secrets
+COPY --chown=${user}:${group} gh.gpg ${homedir}/.secrets/gh.gpg
+COPY --chown=${user}:${group} --chmod=755 gh-cred-helper.sh ${homedir}/.secrets/gh-cred-helper.sh
 
 # Copy certs
 RUN cd && mkdir -p ${homedir}/.certs
@@ -168,6 +173,7 @@ RUN rm -rf /home/${user}/.config/lvim \
 RUN rm -rf /home/${user}/.config/kickstart \
 && git clone https://github.com/vishalgit/kickstart.nvim /home/${user}/.config/kickstart \
 && echo 'alias kvim="NVIM_APPNAME=kickstart nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
+&& echo 'alias nsync="rclone bisync '${homedir}'/notes mega:notes --resync --size-only"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
 && cd /home/${user}/.config/kickstart \
 && git remote add upstream https://github.com/nvim-lua/kickstart.nvim \
 && git remote set-url --push upstream DISABLE
