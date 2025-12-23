@@ -154,6 +154,7 @@ RUN mise use -g aqua:sharkdp/bat
 RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
 RUN mise use -g bun
+RUN mise use -g aqua:rclone/rclone
 
 # Setup LazyVim 
 RUN rm -rf /home/${user}/.config/lvim \
