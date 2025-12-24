@@ -161,13 +161,6 @@ RUN mise use -g aqua:sxyazi/yazi
 RUN mise use -g bun
 RUN mise use -g aqua:rclone/rclone
 
-# Setup LazyVim 
-RUN rm -rf /home/${user}/.config/lvim \
-&& git clone https://github.com/vishalgit/lazyvim /home/${user}/.config/lvim \
-&& echo 'alias lvim="NVIM_APPNAME=lvim nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
-&& cd /home/${user}/.config/lvim \
-&& git remote add upstream https://github.com/LazyVim/starter \
-&& git remote set-url --push upstream DISABLE
 
 # Setup Kickstart
 RUN rm -rf /home/${user}/.config/kickstart \
@@ -182,7 +175,7 @@ RUN rm -rf /home/${user}/.config/kickstart \
 ARG kata_location=${homedir}/.local/bin
 RUN git clone https://github.com/vishalgit/vim-kata && mv vim-kata ${homedir}/.vim-kata && \
 echo "#!/bin/bash" > ${kata_location}/kata && \
-echo "export NVIM_APPNAME=astro" >> ${kata_location}/kata && \
+echo "export NVIM_APPNAME=kickstart nvim" >> ${kata_location}/kata && \
 echo "cd ${homedir}/.vim-kata" >> ${kata_location}/kata && \
 echo "./run.sh" >> ${kata_location}/kata && \
 chmod u+x ${kata_location}/kata
