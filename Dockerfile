@@ -51,7 +51,7 @@ fd-find \
 python3-pip \
 python3-pynvim \
 python3-venv \
-luarocks \
+locate \
 ripgrep \
 tmux
 
