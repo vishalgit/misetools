@@ -52,6 +52,11 @@ python3-pip \
 python3-pynvim \
 python3-venv \
 locate \
+zip \
+unzip \
+gzip \
+bzip2 \
+xz-utils \
 ripgrep \
 tmux
 
@@ -160,6 +165,7 @@ RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
 RUN mise use -g bun
 RUN mise use -g aqua:rclone/rclone
+RUN mise use -g aqua:lsd-rs/lsd
 
 
 # Setup Kickstart
