@@ -168,6 +168,13 @@ RUN mise use -g aqua:rclone/rclone
 RUN mise use -g aqua:lsd-rs/lsd
 
 
+# Setup Astronvim
+RUN rm -rf /home/${user}/.config/astro \
+&& git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
+&& echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
+&& cd /home/${user}/.config/astro \
+&& git remote add upstream https://github.com/AstroNvim/template \
+&& git remote set-url --push upstream DISABLE
 # Setup Kickstart
 RUN rm -rf /home/${user}/.config/kickstart \
 && git clone https://github.com/vishalgit/kickstart.nvim /home/${user}/.config/kickstart \
