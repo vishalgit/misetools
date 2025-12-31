@@ -241,15 +241,6 @@ unzip /tmp/JetBrainsMono.zip -d ${homedir}/.local/share/fonts && \
 rm /tmp/JetBrainsMono.zip && \
 fc-cache -fv
 
-RUN mkdir -p ${homedir}/.config/i3
-COPY --chown=${user}:${group} i3.config ${homedir}/.config/i3/config
-RUN mkdir -p ${homedir}/.config/i3status
-COPY --chown=${user}:${group} i3status.config ${homedir}/.config/i3status/config
-RUN mkdir -p ${homedir}/.config/kitty
-COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
-RUN mkdir -p /home/${user}/.pki/nssdb && \
-certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
-certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
 
 # Install doom emacs
 
@@ -260,6 +251,17 @@ ENV PATH="/home/${user}/.emacs.d/bin:${PATH}"
 RUN rm -rf /home/${user}/.config/emacs && mkdir -p /home/${user}/.config/emacs
 RUN git clone https://github.com/vishalgit/doom /home/${user}/.config/emacs \
 && doom sync
+
+# Setup config files
+RUN mkdir -p ${homedir}/.config/i3
+COPY --chown=${user}:${group} i3.config ${homedir}/.config/i3/config
+RUN mkdir -p ${homedir}/.config/i3status
+COPY --chown=${user}:${group} i3status.config ${homedir}/.config/i3status/config
+RUN mkdir -p ${homedir}/.config/kitty
+COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
+RUN mkdir -p /home/${user}/.pki/nssdb && \
+certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
+certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
 
 # --- install minimal stack ---
 
