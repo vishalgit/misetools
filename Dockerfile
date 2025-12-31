@@ -90,22 +90,28 @@ cmake \
 iproute2 \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+#Copy Certs
+COPY cert.crt /usr/local/share/ca-certificates/cert.crt
+RUN chmod 644 /usr/local/share/ca-certificates/cert.crt && \
+update-ca-certificates && mkdir -p /root/certs
+COPY cert.pem /root/certs/cert.pem
+
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
 | gpg --dearmor > /usr/share/keyrings/google-chrome.gpg && \
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
 https://dl.google.com/linux/chrome/deb/ stable main" \
 > /etc/apt/sources.list.d/google-chrome.list
 
-
 RUN apt-get update && apt-get install -y \
 google-chrome-stable \
 && rm -rf /var/lib/apt/lists/*
 
-#Copy Certs
-COPY cert.crt /usr/local/share/ca-certificates/cert.crt
-RUN chmod 644 /usr/local/share/ca-certificates/cert.crt && \
-update-ca-certificates && mkdir -p /root/certs
-COPY cert.pem /root/certs/cert.pem
+ENV TERM=kitty
+ENV TERMINAL=kitty
+ENV COLORTERM=truecolor
+ENV EDITOR=nvim
+ENV VISUAL=nvim
+ENV TZ=Asia/Kolkata
 
 # Setup non root user
 ARG user=ubuntu
@@ -119,6 +125,33 @@ ARG homedir=/home/${user}
 RUN echo '%'${group}' ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/nopasswd_${group} \
 && chmod 0440 /etc/sudoers.d/nopasswd_${group} &&\
 echo "ubuntu:ubuntu" | chpasswd
+
+# Chromium Wrapper
+RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox --disable-dev-shm-usage "$@"\n' \
+> /usr/local/bin/gc && \
+chmod +x /usr/local/bin/gc && \
+update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/gc 100 && \
+update-alternatives --set x-www-browser /usr/local/bin/gc
+
+# Setup openssh-server
+RUN mkdir -p /var/run/sshd
+RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+# --- XRDP runtime dirs ---
+RUN mkdir -p /var/run/xrdp /var/log/xrdp && \
+chmod 755 /var/run/xrdp /var/log/xrdp
+
+# --- allow XRDP rootless ---
+RUN sed -i 's/^UsePrivilegeSeparation=.*/UsePrivilegeSeparation=false/' /etc/xrdp/sesman.ini
+
+# --- i3 session ---
+# assumes user already exists and HOME is correct at runtime
+RUN echo "exec i3" > /etc/skel/.xsession
+
+
+# --- startup cleanup script ---
+COPY start-xrdp.sh /usr/local/bin/start-xrdp.sh
+RUN chmod +x /usr/local/bin/start-xrdp.sh
 
 USER ${user}
 WORKDIR ${homedir}
@@ -155,14 +188,7 @@ RUN git clone https://github.com/vishalgit/ezsh ezsh \
 && rm -rf ezsh 
 RUN sudo chsh -s /usr/bin/zsh ${user}
 
-
-ENV TERM=kitty
-ENV TERMINAL=kitty
-ENV COLORTERM=truecolor
-ENV EDITOR=nvim
-ENV VISUAL=nvim
 ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/cert.pem
-ENV TZ=Asia/Kolkata
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
 # Setup mise
 RUN curl https://mise.run | sh
@@ -263,36 +289,6 @@ RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
 
-# --- install minimal stack ---
-
-USER root
-WORKDIR /root
-# Chromium Wrapper
-RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox --disable-dev-shm-usage "$@"\n' \
-> /usr/local/bin/gc && \
-chmod +x /usr/local/bin/gc && \
-update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/gc 100 && \
-update-alternatives --set x-www-browser /usr/local/bin/gc
-
-# Setup openssh-server
-RUN mkdir -p /var/run/sshd
-RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
-sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-# --- XRDP runtime dirs ---
-RUN mkdir -p /var/run/xrdp /var/log/xrdp && \
-chmod 755 /var/run/xrdp /var/log/xrdp
-
-# --- allow XRDP rootless ---
-RUN sed -i 's/^UsePrivilegeSeparation=.*/UsePrivilegeSeparation=false/' /etc/xrdp/sesman.ini
-
-# --- i3 session ---
-# assumes user already exists and HOME is correct at runtime
-RUN echo "exec i3" > /etc/skel/.xsession
-
-
-# --- startup cleanup script ---
-COPY start-xrdp.sh /usr/local/bin/start-xrdp.sh
-RUN chmod +x /usr/local/bin/start-xrdp.sh
 
 EXPOSE 3389
 EXPOSE 22
