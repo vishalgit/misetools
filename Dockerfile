@@ -7,7 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
 #Install base system
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && \
+apt-get install -y --no-install-recommends \
 git \
 curl \
 wget \
@@ -58,19 +59,48 @@ gzip \
 bzip2 \
 xz-utils \
 ripgrep \
-tmux
+tmux \
+luarocks \
+openssh-server \
+chromium-browser \
+xrdp \
+xorg \
+xorgxrdp \
+i3-wm \
+i3status \
+dmenu \
+dbus-x11 \
+tini \
+kitty \
+fonts-symbola \
+fonts-noto \
+fonts-noto-color-emoji \
+libatk1.0-0 \
+libatk-bridge2.0-0 \
+libcups2 \
+libdrm2 \
+libxkbcommon0 \
+libgbm1 \
+libgtk-3-0 \
+libnss3-tools && \
+apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository universe -y \
-&& apt-get update && apt-get upgrade -y \
-&& apt-get install -y --no-install-recommends \
-wl-clipboard \
-&& apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+| gpg --dearmor > /usr/share/keyrings/google-chrome.gpg && \
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
+https://dl.google.com/linux/chrome/deb/ stable main" \
+> /etc/apt/sources.list.d/google-chrome.list
+
+
+RUN apt-get update && apt-get install -y \
+google-chrome-stable \
+&& rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
-COPY milliman.crt /usr/local/share/ca-certificates/milliman.crt
-RUN chmod 644 /usr/local/share/ca-certificates/milliman.crt && \
+COPY cert.crt /usr/local/share/ca-certificates/cert.crt
+RUN chmod 644 /usr/local/share/ca-certificates/cert.crt && \
 update-ca-certificates && mkdir -p /root/certs
-COPY milliman.pem /root/certs/milliman.pem
+COPY cert.pem /root/certs/cert.pem
 
 # Setup non root user
 ARG user=ubuntu
@@ -82,7 +112,8 @@ ARG name="Vishal Saxena"
 ARG homedir=/home/${user}
 
 RUN echo '%'${group}' ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/nopasswd_${group} \
-&& chmod 0440 /etc/sudoers.d/nopasswd_${group}
+&& chmod 0440 /etc/sudoers.d/nopasswd_${group} &&\
+echo "ubuntu:ubuntu" | chpasswd
 
 USER ${user}
 WORKDIR ${homedir}
@@ -101,8 +132,8 @@ COPY --chown=${user}:${group} --chmod=755 gh-cred-helper.sh ${homedir}/.secrets/
 
 # Copy certs
 RUN cd && mkdir -p ${homedir}/.certs
-COPY --chown=${user}:${group} milliman.crt ${homedir}/.certs/milliman.crt
-COPY --chown=${user}:${group} milliman.pem ${homedir}/.certs/milliman.pem
+COPY --chown=${user}:${group} cert.crt ${homedir}/.certs/cert.crt
+COPY --chown=${user}:${group} cert.pem ${homedir}/.certs/cert.pem
 
 # Copy config files
 RUN mkdir -p ${homedir}/.config/rclone
@@ -120,11 +151,12 @@ RUN git clone https://github.com/vishalgit/ezsh ezsh \
 RUN sudo chsh -s /usr/bin/zsh ${user}
 
 
-ENV TERM=xterm-256color
+ENV TERM=kitty
+ENV TERMINAL=kitty
 ENV COLORTERM=truecolor
 ENV EDITOR=nvim
 ENV VISUAL=nvim
-ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/milliman.pem
+ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/cert.pem
 ENV TZ=Asia/Kolkata
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
 # Setup mise
@@ -145,7 +177,6 @@ RUN mise use -g npm:typescript
 RUN mise use -g npm:tree-sitter-cli
 RUN mise use -g npm:neovim
 RUN mise use -g npm:pnpm
-RUN mise use -g vfox:mise-plugins/vfox-php
 RUN mise use -g rust
 RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
 RUN ${homedir}/.cargo/bin/rustup target add wasm32-unknown-unknown 
@@ -154,8 +185,8 @@ RUN mise settings set cargo.binstall true
 RUN mise use -g cargo:cargo-leptos
 RUN mise use -g cargo:leptosfmt
 RUN mise use -g cargo:cargo-check
-RUN mise use -g lua
 RUN mise use -g aqua:zellij-org/zellij
+RUN mise use -g vfox:mise-plugins/vfox-php
 RUN mise use -g neovim
 RUN mise use -g aqua:jesseduffield/lazygit
 RUN mise use -g aqua:junegunn/fzf
@@ -197,3 +228,59 @@ chmod u+x ${kata_location}/kata
 RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
 RUN mkdir -p ${homedir}/notes
 COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
+
+# Set up nerdfont
+RUN mkdir -p ${homedir}/.local/share/fonts && \
+wget -q https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip -O /tmp/JetBrainsMono.zip && \
+unzip /tmp/JetBrainsMono.zip -d ${homedir}/.local/share/fonts && \
+rm /tmp/JetBrainsMono.zip && \
+fc-cache -fv
+
+RUN mkdir -p ${homedir}/.config/i3
+COPY --chown=${user}:${group} i3.config ${homedir}/.config/i3/config
+RUN mkdir -p ${homedir}/.config/i3status
+COPY --chown=${user}:${group} i3status.config ${homedir}/.config/i3status/config
+RUN mkdir -p ${homedir}/.config/kitty
+COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
+RUN mkdir -p /home/${user}/.pki/nssdb && \
+certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
+certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
+
+# --- install minimal stack ---
+
+USER root
+WORKDIR /root
+
+# Chromium Wrapper
+RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox --disable-dev-shm-usage "$@"\n' \
+> /usr/local/bin/gc && \
+chmod +x /usr/local/bin/gc && \
+update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/gc 100 && \
+update-alternatives --set x-www-browser /usr/local/bin/gc
+
+# Setup openssh-server
+RUN mkdir -p /var/run/sshd
+RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+# --- XRDP runtime dirs ---
+RUN mkdir -p /var/run/xrdp /var/log/xrdp && \
+chmod 755 /var/run/xrdp /var/log/xrdp
+
+# --- allow XRDP rootless ---
+RUN sed -i 's/^UsePrivilegeSeparation=.*/UsePrivilegeSeparation=false/' /etc/xrdp/sesman.ini
+
+# --- i3 session ---
+# assumes user already exists and HOME is correct at runtime
+RUN echo "exec i3" > /etc/skel/.xsession
+
+
+# --- startup cleanup script ---
+COPY start-xrdp.sh /usr/local/bin/start-xrdp.sh
+RUN chmod +x /usr/local/bin/start-xrdp.sh
+
+EXPOSE 3389
+EXPOSE 22
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/usr/local/bin/start-xrdp.sh"]
+
