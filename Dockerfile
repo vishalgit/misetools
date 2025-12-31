@@ -62,7 +62,6 @@ ripgrep \
 tmux \
 luarocks \
 openssh-server \
-chromium-browser \
 xrdp \
 xorg \
 xorgxrdp \
@@ -82,8 +81,14 @@ libdrm2 \
 libxkbcommon0 \
 libgbm1 \
 libgtk-3-0 \
-libnss3-tools && \
-apt-get clean && rm -rf /var/lib/apt/lists/*
+libnss3-tools \
+emacs-gtk \
+libvterm-dev \
+libjansson-dev \
+libtree-sitter-dev \
+cmake \
+iproute2 \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
 | gpg --dearmor > /usr/share/keyrings/google-chrome.gpg && \
@@ -246,11 +251,20 @@ RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
 
+# Install doom emacs
+
+RUN sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.emacs.d
+RUN /home/${user}/.emacs.d/bin/doom install --force
+ENV PATH="/home/${user}/.emacs.d/bin:${PATH}"
+RUN rm -rf /home/${user}/.config/emacs && mkdir -p /home/${user}/.config/emacs
+RUN git clone https://github.com/vishalgit/doom /home/${user}/.config/emacs \
+&& doom sync
+
 # --- install minimal stack ---
 
 USER root
 WORKDIR /root
-
 # Chromium Wrapper
 RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox --disable-dev-shm-usage "$@"\n' \
 > /usr/local/bin/gc && \
