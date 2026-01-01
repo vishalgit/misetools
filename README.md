@@ -21,6 +21,7 @@ docker run -d -it \
 misetools-image
 
 Sync Rclone From the home directory run this command rclone bisync notes mega:notes --resync --size-only
+Sync Rclone From the home directory run this command rclone bisync ~/org mega:org --resync --size-only
 
 In case of GitHub decrypting error run "gpg --decrypt /home/ubuntu/.secrets/gh.gpg' manually once in session
 

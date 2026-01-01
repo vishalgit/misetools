@@ -270,13 +270,12 @@ fc-cache -fv
 
 # Install doom emacs
 
+RUN git clone https://github.com/vishalgit/doom /home/${user}/.doom.d/ 
 RUN sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.emacs.d
 RUN /home/${user}/.emacs.d/bin/doom install --force
 ENV PATH="/home/${user}/.emacs.d/bin:${PATH}"
-RUN rm -rf /home/${user}/.config/emacs && mkdir -p /home/${user}/.config/emacs
-RUN git clone https://github.com/vishalgit/doom /home/${user}/.config/emacs \
-&& doom sync
+RUN doom sync
 
 # Setup config files
 RUN mkdir -p ${homedir}/.config/i3
@@ -289,7 +288,8 @@ RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
 
-
+USER root
+WORKDIR /root
 EXPOSE 3389
 EXPOSE 22
 
