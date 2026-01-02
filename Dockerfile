@@ -88,6 +88,7 @@ libjansson-dev \
 libtree-sitter-dev \
 cmake \
 iproute2 \
+xpdf \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
