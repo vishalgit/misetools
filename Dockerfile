@@ -234,15 +234,12 @@ RUN mise use -g aqua:lsd-rs/lsd
 # Setup Astronvim
 RUN rm -rf /home/${user}/.config/astro \
 && git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
-&& echo 'alias avim="NVIM_APPNAME=astro nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
 && cd /home/${user}/.config/astro \
 && git remote add upstream https://github.com/AstroNvim/template \
 && git remote set-url --push upstream DISABLE
 # Setup Kickstart
 RUN rm -rf /home/${user}/.config/kickstart \
 && git clone https://github.com/vishalgit/kickstart.nvim /home/${user}/.config/kickstart \
-&& echo 'alias kvim="NVIM_APPNAME=kickstart nvim"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
-&& echo 'alias nsync="rclone bisync '${homedir}'/notes mega:notes --resync --size-only"' >> /home/${user}/.config/ezsh/ezshrc.zsh \
 && cd /home/${user}/.config/kickstart \
 && git remote add upstream https://github.com/nvim-lua/kickstart.nvim \
 && git remote set-url --push upstream DISABLE
@@ -275,7 +272,7 @@ RUN git clone https://github.com/vishalgit/doom /home/${user}/.doom.d/
 RUN sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.emacs.d
 RUN /home/${user}/.emacs.d/bin/doom install --force
-ENV PATH="/home/${user}/.emacs.d/bin:${PATH}"
+ENV PATH=${homedir}"/.emacs.d/bin:"${PATH}
 RUN doom sync
 
 # Setup config files
@@ -288,9 +285,33 @@ COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
 RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
+RUN mkdir -p ${homedir}/org
+COPY --chown=${user}:${group} doomkata.pdf ${homedir}/org/doomkata.pdf
 
 USER root
 WORKDIR /root
+
+# Setup all env vaiables and aliases for all users
+RUN printf "DEBIAN_FRONTEND=noninteractive\n" >> /etc/environment
+RUN printf "LANG=C.UTF-8\n" >> /etc/environment
+RUN printf "NODE_EXTRA_CA_CERTS="${homedir}"/.certs/cert.pem\n" >> /etc/environment
+RUN printf "EDITOR=nvim\n" >> /etc/environment
+RUN printf "TERM=kitty\n" >> /etc/environment
+RUN printf "COLORTERM=truecolor\n" >> /etc/environment
+RUN printf "VISUAL=nvim\n" >> /etc/environment
+RUN printf "TZ=Asia/Kolkata\n" >> /etc/environment
+RUN printf "PATH="${PATH}"\n" >> /etc/environment
+RUN printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias kvim='NVIM_APPNAME=kickstart nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias avim='NVIM_APPNAME=astro nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias gitdc='gpg --decrypt "${homedir}"/.secrets/gh.gpg'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias notesbisync='rclone bisync "${homedir}"/notes mega:notes --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias notessync='rclone sync "${homedir}"/notes mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias orgbisync='rclone bisync "${homedir}"/org mega:org --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias orgsync='rclone sync "${homedir}"/org mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+
 EXPOSE 3389
 EXPOSE 22
 
