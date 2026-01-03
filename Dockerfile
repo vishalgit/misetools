@@ -107,13 +107,6 @@ RUN apt-get update && apt-get install -y \
 google-chrome-stable \
 && rm -rf /var/lib/apt/lists/*
 
-ENV TERM=kitty
-ENV TERMINAL=kitty
-ENV COLORTERM=truecolor
-ENV EDITOR=nvim
-ENV VISUAL=nvim
-ENV TZ=Asia/Kolkata
-
 # Setup non root user
 ARG user=ubuntu
 ARG group=ubuntu
