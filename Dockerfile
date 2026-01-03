@@ -89,6 +89,7 @@ libtree-sitter-dev \
 cmake \
 iproute2 \
 xpdf \
+aria2 \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -186,12 +187,13 @@ ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/cert.pem
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
 # Setup mise
 RUN curl https://mise.run | sh
-ENV PATH="${homedir}/.local/bin:$PATH"
+ENV PATH="${homedir}/.local/bin:${PATH}"
 RUN echo "eval \"\$(mise activate zsh)\"" >> ${homedir}/.config/ezsh/ezshrc.zsh
 RUN mkdir -p ${homedir}/.config/mise
 
 RUN mise use -g go
 RUN mise use -g dotnet
+ENV PATH="${homedir}/.dotnet/tools:${PATH}"
 RUN mise use -g ruby
 RUN mise use -g gem:neovim
 RUN mise use -g gem:rails
@@ -223,6 +225,28 @@ RUN mise use -g bun
 RUN mise use -g aqua:rclone/rclone
 RUN mise use -g aqua:lsd-rs/lsd
 
+# Install doom emacs
+RUN git clone https://github.com/vishalgit/doom /home/${user}/.doom.d/ 
+RUN sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.emacs.d
+RUN /home/${user}/.emacs.d/bin/doom install --force
+ENV PATH="${homedir}/.emacs.d/bin:${PATH}"
+RUN doom sync
+
+# Set up nerdfont
+COPY --chown=${user}:${group} download.txt ${homedir}/download.txt
+RUN mkdir -p ${homedir}/.fonts && \
+aria2c \
+-i ${homedir}/download.txt \
+-d ${homedir}/.fonts \
+-x 16 \
+-s 16 \
+-k 1M \
+-j 4 \
+--file-allocation=trunc \
+--auto-file-renaming=false && \
+rm -rf ${homedir}/download.txt && \
+fc-cache -fv ${homedir}/.fonts
 
 # Setup Astronvim
 RUN rm -rf /home/${user}/.config/astro \
@@ -251,23 +275,6 @@ RUN git clone https://github.com/tmux-plugins/tpm ${homedir}/.tmux/plugins/tpm
 RUN mkdir -p ${homedir}/notes
 COPY --chown=${user}:${group} tmux.conf ${homedir}/.tmux.conf
 
-# Set up nerdfont
-RUN mkdir -p ${homedir}/.local/share/fonts && \
-wget -q https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip -O /tmp/JetBrainsMono.zip && \
-unzip /tmp/JetBrainsMono.zip -d ${homedir}/.local/share/fonts && \
-rm /tmp/JetBrainsMono.zip && \
-fc-cache -fv
-
-
-# Install doom emacs
-
-RUN git clone https://github.com/vishalgit/doom /home/${user}/.doom.d/ 
-RUN sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
-RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.emacs.d
-RUN /home/${user}/.emacs.d/bin/doom install --force
-ENV PATH=${homedir}"/.emacs.d/bin:"${PATH}
-RUN doom sync
-
 # Setup config files
 RUN mkdir -p ${homedir}/.config/i3
 COPY --chown=${user}:${group} i3.config ${homedir}/.config/i3/config
@@ -289,11 +296,12 @@ RUN printf "DEBIAN_FRONTEND=noninteractive\n" >> /etc/environment
 RUN printf "LANG=C.UTF-8\n" >> /etc/environment
 RUN printf "NODE_EXTRA_CA_CERTS="${homedir}"/.certs/cert.pem\n" >> /etc/environment
 RUN printf "EDITOR=nvim\n" >> /etc/environment
-RUN printf "TERM=kitty\n" >> /etc/environment
+RUN printf "TERM=xterm-kitty\n" >> /etc/environment
 RUN printf "COLORTERM=truecolor\n" >> /etc/environment
 RUN printf "VISUAL=nvim\n" >> /etc/environment
 RUN printf "TZ=Asia/Kolkata\n" >> /etc/environment
-RUN printf "PATH="${PATH}"\n" >> /etc/environment
+RUN set -eux; \
+echo "PATH=${PATH}:$PATH" >> /etc/environment
 RUN printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
