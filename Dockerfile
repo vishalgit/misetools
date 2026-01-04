@@ -292,6 +292,7 @@ USER root
 WORKDIR /root
 
 # Setup all env vaiables and aliases for all users
+RUN printf "PATH=\"${PATH}\"\n" > /etc/environment
 RUN printf "DEBIAN_FRONTEND=noninteractive\n" >> /etc/environment
 RUN printf "LANG=C.UTF-8\n" >> /etc/environment
 RUN printf "NODE_EXTRA_CA_CERTS="${homedir}"/.certs/cert.pem\n" >> /etc/environment
@@ -300,8 +301,6 @@ RUN printf "TERM=xterm-kitty\n" >> /etc/environment
 RUN printf "COLORTERM=truecolor\n" >> /etc/environment
 RUN printf "VISUAL=nvim\n" >> /etc/environment
 RUN printf "TZ=Asia/Kolkata\n" >> /etc/environment
-RUN set -eux; \
-echo "PATH=${PATH}:$PATH" >> /etc/environment
 RUN printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
