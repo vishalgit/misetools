@@ -248,11 +248,11 @@ aria2c \
 rm -rf ${homedir}/download.txt && \
 fc-cache -fv ${homedir}/.fonts
 
-# Setup Astronvim
-RUN rm -rf /home/${user}/.config/astro \
-&& git clone https://github.com/vishalgit/astrotemplate /home/${user}/.config/astro \
-&& cd /home/${user}/.config/astro \
-&& git remote add upstream https://github.com/AstroNvim/template \
+# Setup Lazyvim
+RUN rm -rf /home/${user}/.config/lazyvim \
+&& git clone https://github.com/vishalgit/lazyvim /home/${user}/.config/lazyvim \
+&& cd /home/${user}/.config/lazyvim \
+&& git remote add upstream https://github.com/LazyVim/starter \
 && git remote set-url --push upstream DISABLE
 # Setup Kickstart
 RUN rm -rf /home/${user}/.config/kickstart \
@@ -305,7 +305,7 @@ RUN printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezs
 RUN printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias kvim='NVIM_APPNAME=kickstart nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias avim='NVIM_APPNAME=astro nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "alias lvim='NVIM_APPNAME=lazyvim nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias gitdc='gpg --decrypt "${homedir}"/.secrets/gh.gpg'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias notesbisync='rclone bisync "${homedir}"/notes mega:notes --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 RUN printf "alias notessync='rclone sync "${homedir}"/notes mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
