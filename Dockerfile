@@ -139,11 +139,6 @@ chmod 755 /var/run/xrdp /var/log/xrdp
 # --- allow XRDP rootless ---
 RUN sed -i 's/^UsePrivilegeSeparation=.*/UsePrivilegeSeparation=false/' /etc/xrdp/sesman.ini
 
-# --- i3 session ---
-# assumes user already exists and HOME is correct at runtime
-RUN echo "exec i3" > /etc/skel/.xsession
-
-
 # --- startup cleanup script ---
 COPY start-xrdp.sh /usr/local/bin/start-xrdp.sh
 RUN chmod +x /usr/local/bin/start-xrdp.sh
@@ -224,6 +219,7 @@ RUN mise use -g aqua:sxyazi/yazi
 RUN mise use -g bun
 RUN mise use -g aqua:rclone/rclone
 RUN mise use -g aqua:lsd-rs/lsd
+RUN mise use -g github:neovide/neovide
 
 # Install doom emacs
 RUN git clone https://github.com/vishalgit/doom /home/${user}/.doom.d/ 
@@ -234,19 +230,11 @@ ENV PATH="${homedir}/.emacs.d/bin:${PATH}"
 RUN doom sync
 
 # Set up nerdfont
-COPY --chown=${user}:${group} download.txt ${homedir}/download.txt
 RUN mkdir -p ${homedir}/.fonts && \
-aria2c \
--i ${homedir}/download.txt \
--d ${homedir}/.fonts \
--x 16 \
--s 16 \
--k 1M \
--j 4 \
---file-allocation=trunc \
---auto-file-renaming=false && \
-rm -rf ${homedir}/download.txt && \
-fc-cache -fv ${homedir}/.fonts
+wget -q --show-progress https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz -O ${homedir}/JetBrainsMono.tar.xz && \
+tar -xvf ${homedir}/JetBrainsMono.tar.xz -C ${homedir}/.fonts && \
+fc-cache -fv ${homedir}/.fonts \
+&& rm -rf ${homedir}/JetBrainsMono.tar.xz
 
 # Setup Lazyvim
 RUN rm -rf /home/${user}/.config/lazyvim \
@@ -285,6 +273,11 @@ COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
 RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
+COPY --chown=${user}:${group} doomkata.pdf ${homedir}/org/doomkata.pdf
+COPY --chown=${user}:${group} i3_start ${homedir}/.xsession
+RUN chmod +x ${homedir}/.xsession
+RUN mkdir -p ${homedir}/.config/neovide
+COPY --chown=${user}:${group} neovide.toml ${homedir}/.config/neovide/config.toml
 RUN mkdir -p ${homedir}/org
 COPY --chown=${user}:${group} doomkata.pdf ${homedir}/org/doomkata.pdf
 
@@ -317,4 +310,3 @@ EXPOSE 22
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/start-xrdp.sh"]
-

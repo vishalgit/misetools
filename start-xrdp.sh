@@ -22,14 +22,6 @@ chmod 1777 /tmp/.X11-unix
 
 echo "✅ XRDP cleanup complete"
 
-echo "🚀 Starting dbus..."
-
-if [ ! -S /run/dbus/system_bus_socket ]; then
-  mkdir -p /run/dbus
-  chmod 755 /run/dbus
-  dbus-daemon --system --fork
-fi
-
 echo "🚀 Starting sshd..."
 /usr/sbin/sshd
 
