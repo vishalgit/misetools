@@ -91,11 +91,11 @@ libvterm-dev \
 libjansson-dev \
 libtree-sitter-dev \
 cmake \
-iproute2 \
-xpdf \
 aria2 \
 google-chrome-stable \
 emacs-gtk \
+zathura \
+zathura-pdf-poppler \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -103,8 +103,6 @@ COPY cert.crt /usr/local/share/ca-certificates/cert.crt
 RUN chmod 644 /usr/local/share/ca-certificates/cert.crt && \
 update-ca-certificates && mkdir -p /root/certs
 COPY cert.pem /root/certs/cert.pem
-# Setup guix store
-RUN mkdir -p /gnu/store && chmod 1775 /gnu/store
 
 # Setup non root user
 ARG user=ubuntu
@@ -178,6 +176,7 @@ RUN sudo chsh -s /usr/bin/zsh ${user}
 
 ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/cert.pem
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
+RUN mkdir -p ${homedir}/.bundle && echo "BUNDLE_NO_DOC: \"true\"\n" > ${homedir}/.bundle/config
 # Setup mise
 RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:${PATH}"
@@ -188,7 +187,6 @@ RUN mise use -g go
 RUN mise use -g dotnet
 ENV PATH="${homedir}/.dotnet/tools:${PATH}"
 RUN mise use -g ruby
-RUN mkdir -p ${homedir}/.bundle && echo "BUNDLE_NO_DOC: \"true\"\n" > ${homedir}/.bundle/config
 RUN mise use -g gem:neovim
 RUN mise use -g gem:rails
 RUN mise use -g node@lts
@@ -265,7 +263,6 @@ COPY --chown=${user}:${group} kitty.config ${homedir}/.config/kitty/kitty.conf
 RUN mkdir -p /home/${user}/.pki/nssdb && \
 certutil -d sql:/home/${user}/.pki/nssdb -N --empty-password && \
 certutil -d sql:/home/${user}/.pki/nssdb -A -t "C,," -n "VishalCert" -i /home/${user}/.certs/cert.crt 
-COPY --chown=${user}:${group} doomkata.pdf ${homedir}/org/doomkata.pdf
 COPY --chown=${user}:${group} i3_start ${homedir}/.xsession
 RUN chmod +x ${homedir}/.xsession
 RUN mkdir -p ${homedir}/.config/neovide
