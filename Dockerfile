@@ -1,26 +1,30 @@
-FROM ubuntu:noble
-
+FROM ubuntu:24.04
 USER root
 WORKDIR /root
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
+COPY google-chrome.gpg /usr/share/keyrings/google-chrome.gpg
+RUN printf "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
+http://dl.google.com/linux/chrome/deb/ stable main" \
+> /etc/apt/sources.list.d/google-chrome.list
+
 #Install base system
-RUN apt-get update && apt-get upgrade -y && \
+RUN apt-get update && \
 apt-get install -y --no-install-recommends \
 git \
-curl \
 wget \
+gnupg2 \
+apt-transport-https \
+ca-certificates \
+curl \
 zsh \
 build-essential \
 software-properties-common \
 xclip \
 sudo \
-gnupg2 \
 gh \
-apt-transport-https \
-ca-certificates \
 fontconfig \
 autoconf \
 libssl-dev \
@@ -67,6 +71,7 @@ xorg \
 xorgxrdp \
 i3-wm \
 i3status \
+rofi \
 dmenu \
 dbus-x11 \
 tini \
@@ -82,7 +87,6 @@ libxkbcommon0 \
 libgbm1 \
 libgtk-3-0 \
 libnss3-tools \
-emacs-gtk \
 libvterm-dev \
 libjansson-dev \
 libtree-sitter-dev \
@@ -90,6 +94,8 @@ cmake \
 iproute2 \
 xpdf \
 aria2 \
+google-chrome-stable \
+emacs-gtk \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -97,16 +103,8 @@ COPY cert.crt /usr/local/share/ca-certificates/cert.crt
 RUN chmod 644 /usr/local/share/ca-certificates/cert.crt && \
 update-ca-certificates && mkdir -p /root/certs
 COPY cert.pem /root/certs/cert.pem
-
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
-| gpg --dearmor > /usr/share/keyrings/google-chrome.gpg && \
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
-https://dl.google.com/linux/chrome/deb/ stable main" \
-> /etc/apt/sources.list.d/google-chrome.list
-
-RUN apt-get update && apt-get install -y \
-google-chrome-stable \
-&& rm -rf /var/lib/apt/lists/*
+# Setup guix store
+RUN mkdir -p /gnu/store && chmod 1775 /gnu/store
 
 # Setup non root user
 ARG user=ubuntu
@@ -122,7 +120,7 @@ RUN echo '%'${group}' ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/nopasswd_${group}
 echo "ubuntu:ubuntu" | chpasswd
 
 # Chromium Wrapper
-RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox --disable-dev-shm-usage "$@"\n' \
+RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox "$@"\n' \
 > /usr/local/bin/gc && \
 chmod +x /usr/local/bin/gc && \
 update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/gc 100 && \
@@ -190,6 +188,7 @@ RUN mise use -g go
 RUN mise use -g dotnet
 ENV PATH="${homedir}/.dotnet/tools:${PATH}"
 RUN mise use -g ruby
+RUN mkdir -p ${homedir}/.bundle && echo "BUNDLE_NO_DOC: \"true\"\n" > ${homedir}/.bundle/config
 RUN mise use -g gem:neovim
 RUN mise use -g gem:rails
 RUN mise use -g node@lts
@@ -198,7 +197,6 @@ RUN mise use -g npm:@anthropic-ai/claude-code
 RUN mise use -g npm:typescript
 RUN mise use -g npm:tree-sitter-cli
 RUN mise use -g npm:neovim
-RUN mise use -g npm:pnpm
 RUN mise use -g rust
 RUN ${homedir}/.cargo/bin/rustup component add rust-analyzer
 RUN ${homedir}/.cargo/bin/rustup target add wasm32-unknown-unknown 
@@ -207,18 +205,13 @@ RUN mise settings set cargo.binstall true
 RUN mise use -g cargo:cargo-leptos
 RUN mise use -g cargo:leptosfmt
 RUN mise use -g cargo:cargo-check
-RUN mise use -g aqua:zellij-org/zellij
 RUN mise use -g vfox:mise-plugins/vfox-php
 RUN mise use -g neovim
-RUN mise use -g aqua:jesseduffield/lazygit
-RUN mise use -g aqua:junegunn/fzf
 RUN mise use -g aqua:jqlang/jq
 RUN mise use -g aqua:sharkdp/bat
 RUN mise use -g aqua:eth-p/bat-extras
 RUN mise use -g aqua:sxyazi/yazi
-RUN mise use -g bun
 RUN mise use -g aqua:rclone/rclone
-RUN mise use -g aqua:lsd-rs/lsd
 RUN mise use -g github:neovide/neovide
 
 # Install doom emacs
@@ -228,7 +221,6 @@ RUN git clone --depth 1 https://github.com/doomemacs/doomemacs /home/${user}/.em
 RUN /home/${user}/.emacs.d/bin/doom install --force
 ENV PATH="${homedir}/.emacs.d/bin:${PATH}"
 RUN doom sync
-
 # Set up nerdfont
 RUN mkdir -p ${homedir}/.fonts && \
 wget -q --show-progress https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz -O ${homedir}/JetBrainsMono.tar.xz && \
@@ -278,32 +270,31 @@ COPY --chown=${user}:${group} i3_start ${homedir}/.xsession
 RUN chmod +x ${homedir}/.xsession
 RUN mkdir -p ${homedir}/.config/neovide
 COPY --chown=${user}:${group} neovide.toml ${homedir}/.config/neovide/config.toml
-RUN mkdir -p ${homedir}/org
-COPY --chown=${user}:${group} doomkata.pdf ${homedir}/org/doomkata.pdf
+RUN mkdir -p org projects 
 
 USER root
 WORKDIR /root
 
 # Setup all env vaiables and aliases for all users
-RUN printf "PATH=\"${PATH}\"\n" > /etc/environment
-RUN printf "DEBIAN_FRONTEND=noninteractive\n" >> /etc/environment
-RUN printf "LANG=C.UTF-8\n" >> /etc/environment
-RUN printf "NODE_EXTRA_CA_CERTS="${homedir}"/.certs/cert.pem\n" >> /etc/environment
-RUN printf "EDITOR=nvim\n" >> /etc/environment
-RUN printf "TERM=xterm-kitty\n" >> /etc/environment
-RUN printf "COLORTERM=truecolor\n" >> /etc/environment
-RUN printf "VISUAL=nvim\n" >> /etc/environment
-RUN printf "TZ=Asia/Kolkata\n" >> /etc/environment
-RUN printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias kvim='NVIM_APPNAME=kickstart nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias lvim='NVIM_APPNAME=lazyvim nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias gitdc='gpg --decrypt "${homedir}"/.secrets/gh.gpg'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias notesbisync='rclone bisync "${homedir}"/notes mega:notes --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias notessync='rclone sync "${homedir}"/notes mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias orgbisync='rclone bisync "${homedir}"/org mega:org --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
-RUN printf "alias orgsync='rclone sync "${homedir}"/org mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+RUN printf "PATH=\"${PATH}\"\n" > /etc/environment && \
+printf "DEBIAN_FRONTEND=noninteractive\n" >> /etc/environment && \
+printf "LANG=C.UTF-8\n" >> /etc/environment && \
+printf "NODE_EXTRA_CA_CERTS="${homedir}"/.certs/cert.pem\n" >> /etc/environment && \
+printf "EDITOR=nvim\n" >> /etc/environment && \
+printf "TERM=xterm-kitty\n" >> /etc/environment && \
+printf "COLORTERM=truecolor\n" >> /etc/environment && \
+printf "VISUAL=nvim\n" >> /etc/environment && \
+printf "TZ=Asia/Kolkata\n" >> /etc/environment && \
+printf "alias ll='ls -alF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias la='ls -A --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias l='ls -CF --color=auto'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias kvim='NVIM_APPNAME=kickstart nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias lvim='NVIM_APPNAME=lazyvim nvim'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias gitdc='gpg --decrypt "${homedir}"/.secrets/gh.gpg'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias notesbisync='rclone bisync "${homedir}"/notes mega:notes --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias notessync='rclone sync "${homedir}"/notes mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias orgbisync='rclone bisync "${homedir}"/org mega:org --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
+printf "alias orgsync='rclone sync "${homedir}"/org mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 
 EXPOSE 3389
 EXPOSE 22
