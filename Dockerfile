@@ -118,7 +118,7 @@ RUN echo '%'${group}' ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/nopasswd_${group}
 echo "ubuntu:ubuntu" | chpasswd
 
 # Chromium Wrapper
-RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome-stable %U' \
+RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome-stable' \
 > /usr/local/bin/gc && \
 chmod +x /usr/local/bin/gc && \
 update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/gc 100 && \
