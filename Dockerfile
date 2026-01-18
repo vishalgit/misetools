@@ -176,7 +176,7 @@ RUN sudo chsh -s /usr/bin/zsh ${user}
 
 ENV NODE_EXTRA_CA_CERTS=${homedir}/.certs/cert.pem
 RUN echo "gem: --no-document" >> ${homedir}/.gemrc
-RUN mkdir -p ${homedir}/.bundle && echo "BUNDLE_NO_DOC: \"true\"\n" > ${homedir}/.bundle/config
+RUN mkdir -p ${homedir}/.bundle && echo "BUNDLE_NO_DOC: \"true\"\n" > ${homedir}/.bundle/config && echo "BUNDLE_PATH: \"/home/${user}/.bundle/vendor/bundle\"" >> ${homedir}/.bundle/config
 # Setup mise
 RUN curl https://mise.run | sh
 ENV PATH="${homedir}/.local/bin:${PATH}"
