@@ -25,17 +25,18 @@ Sync Rclone From the home directory run this command rclone bisync ~/org mega:or
 
 In case of GitHub decrypting error run "gpg --decrypt /home/ubuntu/.secrets/gh.gpg' manually once in session
 
-docker run -it \
+docker create \
 --name misetools-container \
---network=host \
+-h misetools \
 --shm-size=4g \
 --memory=0 \
 --memory-swap=0 \
 --cpus=0 \
 --cap-add=SYS_PTRACE \
 --security-opt seccomp=unconfined \
--p 3389:3389 \
--p 22:22 \
+-p 33890:3389 \
+-p 2222:22 \
+-p 30000:3000 \
 -v projects:/home/ubuntu/projects \
 -e DISPLAY=$DISPLAY \
 -e XAUTHORITY=$XAUTHORITY \
