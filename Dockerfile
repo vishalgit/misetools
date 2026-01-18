@@ -295,6 +295,7 @@ printf "alias orgsync='rclone sync "${homedir}"/org mega:notes'\n" >> /home/${us
 
 EXPOSE 3389
 EXPOSE 22
+EXPOSE 3000
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/start-xrdp.sh"]
