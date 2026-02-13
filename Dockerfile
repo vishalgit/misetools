@@ -96,6 +96,7 @@ google-chrome-stable \
 emacs-gtk \
 zathura \
 zathura-pdf-poppler \
+feh \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Copy Certs
@@ -158,6 +159,9 @@ COPY --chown=${user}:${group} --chmod=755 gh-cred-helper.sh ${homedir}/.secrets/
 RUN cd && mkdir -p ${homedir}/.certs
 COPY --chown=${user}:${group} cert.crt ${homedir}/.certs/cert.crt
 COPY --chown=${user}:${group} cert.pem ${homedir}/.certs/cert.pem
+
+# Copy wallpaper
+COPY --chown=${user}:${group} milkyway.jpg ${homedir}/wallpapers/milkyway.jpg
 
 # Copy config files
 RUN mkdir -p ${homedir}/.config/rclone
@@ -291,7 +295,7 @@ printf "alias gitdc='gpg --decrypt "${homedir}"/.secrets/gh.gpg'\n" >> /home/${u
 printf "alias notesbisync='rclone bisync "${homedir}"/notes mega:notes --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
 printf "alias notessync='rclone sync "${homedir}"/notes mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
 printf "alias orgbisync='rclone bisync "${homedir}"/org mega:org --resync --size-only'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh && \
-printf "alias orgsync='rclone sync "${homedir}"/org mega:notes'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
+printf "alias orgsync='rclone sync "${homedir}"/org mega:org'\n" >> /home/${user}/.config/ezsh/ezshrc.zsh
 
 EXPOSE 3389
 EXPOSE 22
